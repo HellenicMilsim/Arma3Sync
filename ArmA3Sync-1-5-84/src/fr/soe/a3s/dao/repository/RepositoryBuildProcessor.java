@@ -103,8 +103,11 @@ public class RepositoryBuildProcessor implements DataAccessConstants,
 		/* Generate new Sync */
 		final SyncTreeDirectory sync = new SyncTreeDirectory(
 				SyncTreeDirectory.RACINE, null);
-		for (File f : (new File(repository.getPath()).listFiles())) {
-			generateSync(repository.getExcludedFilesFromBuild(), sync, f);
+		File[] repositoryFiles = new File(repository.getPath()).listFiles();
+		if (repositoryFiles != null) {
+			for (File f : repositoryFiles) {
+				generateSync(repository.getExcludedFilesFromBuild(), sync, f);
+			}
 		}
 
 		/* Extract new list of files */
@@ -395,20 +398,20 @@ public class RepositoryBuildProcessor implements DataAccessConstants,
 
 		if (file.isDirectory()) {
 			if (!file.getName().contains(A3S_FOlDER_NAME)) {// always true
-				// unless
-				// deleteDitrectory(.a3s)
-				// failed
 				SyncTreeDirectory syncTreeDirectory = new SyncTreeDirectory(
 						file.getName(), parent);
 				parent.addTreeNode(syncTreeDirectory);
 				syncTreeDirectory.setDestinationPath(file.getParentFile()
 						.getAbsolutePath());
-
-				for (File f : file.listFiles()) {
-					if (f.getName().toLowerCase().equals("addons")) {
-						syncTreeDirectory.setMarkAsAddon(true);
+				File[] subFiles = file.listFiles();
+				if (subFiles != null) {
+					for (File f : subFiles) {
+						if (f.getName().toLowerCase().equals("addons")) {
+							syncTreeDirectory.setMarkAsAddon(true);
+						}
+						generateSync(excludedFilesFromBuild, syncTreeDirectory,
+								f);
 					}
-					generateSync(excludedFilesFromBuild, syncTreeDirectory, f);
 				}
 			}
 		}
